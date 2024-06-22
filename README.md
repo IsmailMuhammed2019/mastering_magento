@@ -1,6 +1,6 @@
 # Magento 2 Tutorial
 
-Welcome to the Mastering Magento 2 Tutorial repository! This guide will help you set up, configure, and use Magento 2 for your e-commerce website.
+Welcome to the Mastering Magento 2 Tutorial repository! This guide will help you set up, configure, and use Magento 2 for Developing frontend activities to use and develop best practices in delivering the best e-commerce websites. 
 
 ## Table of Contents
 
@@ -10,7 +10,8 @@ Welcome to the Mastering Magento 2 Tutorial repository! This guide will help you
 4. [Configuration](#configuration)
 5. [Usage](#usage)
 6. [Contributing](#contributing)
-7. [License](#license)
+7. [Resources](#resources)
+8. [License](#license)
 
 ## Introduction
 
@@ -121,6 +122,12 @@ We welcome contributions! Follow these steps to contribute:
 3. Commit your changes (`git commit -am 'Add your feature'`).
 4. Push to the branch (`git push origin feature/your-feature`).
 5. Create a new Pull Request.
+
+## Resources
+
+### Video Links
+1. https://drive.google.com/file/d/10kXWJjwTfVKblpjAOK9c2vrHk35ffrMQ/view?usp=sharing
+
 
 ## License
 
