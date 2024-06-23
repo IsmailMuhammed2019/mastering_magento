@@ -1,0 +1,158 @@
+version: '3.9'
+
+services:
+  mariadb:
+    image: mariadb:10.6
+    container_name: mariadb
+    logging:
+      driver: none
+    command: >
+      --innodb-buffer-pool-size=${MYSQL_BUFFER_POOL_SIZE}
+      --innodb-log-file-size=${MYSQL_LOG_FILE_SIZE}
+      --innodb-log-buffer-size=${MYSQL_LOG_BUFFER_SIZE}
+      --max-allowed-packet=${MYSQL_MAX_ALLOWED_PACKET}
+      --max-connections=${MYSQL_MAX_CONNECTIONS}
+      --query-cache-size=${MYSQL_QUERY_CACHE_SIZE}
+      --query-cache-limit=${MYSQL_QUERY_CACHE_LIMIT}
+      --innodb-flush-method=O_DIRECT
+      --innodb-file-per-table=1
+    volumes:
+      - ./data/db:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    restart: always
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    networks:
+      - magento_network
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+    ports:
+      - 9200:9200
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200"]
+      timeout: 20s
+      retries: 10
+    networks:
+      - magento_network
+
+  rabbitmq:
+    image: rabbitmq:3.9
+    container_name: rabbitmq
+    logging:
+      driver: none
+    volumes:
+      - my_rabbitmq_data_volume:/var/lib/rabbitmq
+      - my_rabbitmq_config_volume:/etc/rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    restart: always
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      timeout: 20s
+      retries: 10
+    networks:
+      - magento_network
+
+  redis:
+    image: redis:7.0
+    container_name: redis
+    logging:
+      driver: none
+    volumes:
+      - my_redis_data_volume:/data
+      - my_redis_config_volume:/usr/local/etc/redis/redis.conf
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      timeout: 20s
+      retries: 10
+    networks:
+      - magento_network
+
+  litespeed:
+    image: litespeedtech/openlitespeed:${OLS_VERSION}-${PHP_VERSION}
+    container_name: litespeed
+    env_file:
+      - .env
+    volumes:
+      - ./lsws/conf:/usr/local/lsws/conf
+      - ./lsws/admin-conf:/usr/local/lsws/admin/conf
+      - ./bin/container:/usr/local/bin
+      - ./sites:/var/www/vhosts/
+      - ./acme:/root/.acme.sh/
+      - ./logs:/usr/local/lsws/logs/
+    ports:
+      - 80:80
+      - 443:443
+      - 443:443/udp
+      - 7080:7080
+    restart: always
+    environment:
+      TZ: ${TimeZone}
+    networks:
+      - magento_network
+
+  # phpmyadmin:
+  #   image: bitnami/phpmyadmin:5.2.0-debian-11-r43
+  #   container_name: phpmyadmin
+  #   ports:
+  #     - 8080:8080
+  #     - 8443:8443
+  #   environment:
+  #     PMA_HOST: mariadb
+  #     PMA_USER: ${MYSQL_USER}
+  #     PMA_PASSWORD: ${MYSQL_PASSWORD}
+  #   restart: always
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost/index.php"]
+  #     timeout: 20s
+  #     retries: 10
+  #   networks:
+  #     - magento_network
+
+  phpmyadmin:
+    image: bitnami/phpmyadmin:5.2.0-debian-11-r43
+    container_name: phpmyadmin
+    ports:
+      - 8080:8080
+      - 8443:8443
+    environment:
+      PMA_HOST: mariadb
+      PMA_USER: ${MYSQL_USER}
+      PMA_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - ./custom.ini:/usr/local/etc/php/conf.d/custom.ini
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/index.php"]
+      timeout: 20s
+      retries: 10
+    networks:
+      - magento_network
+
+volumes:
+  esdata:
+  my_rabbitmq_data_volume:
+  my_rabbitmq_config_volume:
+  my_redis_data_volume:
+  my_redis_config_volume:
+
+networks:
+  magento_network:
+    driver: bridge
