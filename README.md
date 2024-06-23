@@ -125,6 +125,23 @@ We welcome contributions! Follow these steps to contribute:
 
 ## Resources
 
+### Useful Links
+1. Intalling docker
+https://docs.docker.com/desktop/install/windows-install/
+
+2. Installing docker-compose 
+https://docs.docker.com/compose/install/
+
+3. Magento Installation requirements
+https://experienceleague.adobe.com/en/docs/commerce-operations/installation-guide/system-requirements
+
+4. Open Litespeed repository
+https://github.com/litespeedtech/ols-docker-env/tree/v1.6.15
+
+5. Installing chocolatey for windows
+https://chocolatey.org/install
+
+
 ### Video Links
 1. https://drive.google.com/file/d/10kXWJjwTfVKblpjAOK9c2vrHk35ffrMQ/view?usp=sharing
 
